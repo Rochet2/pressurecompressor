@@ -91,7 +91,7 @@ public class BitStorageTest {
     public void readFrontReadsStoredBits() {
         store.writeBack(0, 2);
         store.writeBack(1, 1);
-        assertEquals(4, store.readFront(3));
+        assertEquals(1, store.readFront(3));
     }
 
     @Test

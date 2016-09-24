@@ -5,6 +5,7 @@
  */
 package pressurecompressor.containers;
 
+import pressurecompressor.StringUtility;
 import pressurecompressor.containers.linkedlist.LinkedList;
 import pressurecompressor.containers.linkedlist.Node;
 
@@ -25,13 +26,26 @@ public class BitStorage {
     }
 
     /**
+     * Creates a new bit storage containing the bits from the given string
+     *
+     * @param input
+     */
+    public BitStorage(String input) {
+        this();
+        byte[] temp = StringUtility.stringToBytes(input);
+        for (byte b : temp) {
+            writeBack(b, Byte.SIZE);
+        }
+    }
+
+    /**
      * Writes a given number of bits from given data to the back of the storage
      *
      * @param data
      * @param numberOfBitsToWrite
      */
     public void writeBack(int data, int numberOfBitsToWrite) {
-        for (int i = 0; i < numberOfBitsToWrite; ++i) {
+        for (int i = numberOfBitsToWrite - 1; i >= 0; --i) {
             bitStorage.pushBack(((data >> i) & 1) == 1);
         }
     }
@@ -45,7 +59,7 @@ public class BitStorage {
      */
     public int readFront(int numberOfBitsToRead) {
         int data = 0;
-        for (int i = 0; i < numberOfBitsToRead; ++i) {
+        for (int i = numberOfBitsToRead - 1; i >= 0; --i) {
             if (hasBitsToRead(1) && bitStorage.popFront()) {
                 data |= 1 << i;
             }
@@ -74,18 +88,18 @@ public class BitStorage {
     }
 
     /**
-     * Returns the stored bits reinterpreted as ASCII text and empties the
-     * storage
+     * Returns the stored bits reinterpreted as text and empties the storage.
      *
      * @return
      */
     public String flushToString() {
-        StringBuilder sb = new StringBuilder();
+        byte[] bytes = new byte[(int) Math.ceil(bitStorage.length() / (double) Byte.SIZE)];
+        int written = 0;
         while (hasBitsToRead(1)) {
             int value = readFront(Byte.SIZE);
-            sb.append((char) value);
+            bytes[written++] = (byte) value;
         }
-        return sb.toString();
+        return StringUtility.bytesToString(bytes);
     }
 
     /**
