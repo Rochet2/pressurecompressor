@@ -5,6 +5,9 @@
  */
 package pressurecompressor.containers;
 
+import pressurecompressor.StringUtility;
+import pressurecompressor.containers.linkedlist.LinkedList;
+
 /**
  * A class that handles keeping a dictionary of strings mapped to numbers
  *
@@ -12,7 +15,7 @@ package pressurecompressor.containers;
  */
 public class Dictionary {
 
-    private final String[] dictionary;
+    private final LinkedList<String> lru;
     private int elements = 0;
 
     /**
@@ -22,7 +25,7 @@ public class Dictionary {
      * @param amountOfElements
      */
     public Dictionary(int amountOfElements) {
-        this.dictionary = new String[amountOfElements];
+        this.lru = new LinkedList<>();
     }
 
     /**
@@ -35,10 +38,9 @@ public class Dictionary {
         if (string == null) {
             return null;
         }
-        for (int i = 0; i < elements; ++i) {
-            if (string.equals(dictionary[i])) {
-                return i;
-            }
+        if (lru.remove(string)) {
+            lru.pushBack(string);
+            return elements;
         }
         return null;
     }
@@ -65,7 +67,12 @@ public class Dictionary {
      * @param string
      */
     public void add(String string) {
-        if (isFull() || string == null) {
+        System.out.println(string);
+        if (isFull()) {
+            System.out.println("full");
+            return;
+        }
+        if (string == null) {
             return;
         }
         dictionary[elements] = string;

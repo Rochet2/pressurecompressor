@@ -15,11 +15,11 @@ import static org.junit.Assert.*;
  */
 public class LinkedListTest {
 
-    private LinkedList list;
+    private LinkedList<Object> list;
 
     @Before
     public void setUp() {
-        list = new LinkedList();
+        list = new LinkedList<>();
     }
 
     @Test
@@ -79,8 +79,9 @@ public class LinkedListTest {
 
     @Test
     public void popBackReturnsTheValueOfTheElementWhenPoppingLastElementFromList() {
-        list.pushBack(true);
-        assertTrue(list.popBack());
+        Object expected = new Object();
+        list.pushBack(expected);
+        assertEquals(expected, list.popBack());
     }
 
     @Test
@@ -90,45 +91,55 @@ public class LinkedListTest {
 
     @Test
     public void peekFrontReturnsFrontElementWhenListHasMultipleElements() {
-        list.pushBack(true);
-        list.pushBack(false);
-        assertTrue(list.peekFront().data);
+        Object expected1 = new Object();
+        Object expected2 = new Object();
+        list.pushBack(expected1);
+        list.pushBack(expected2);
+        assertEquals(expected1, list.peekFront().data);
     }
 
     @Test
-    public void popBackReturnsFalseWhenListEmpty() {
-        assertFalse(list.popBack());
+    public void popBackReturnsNullWhenListEmpty() {
+        assertNull(list.popBack());
     }
 
     @Test
     public void popBackReturnsTheBackNodeAndReducesTheSizeOfTheList() {
-        list.pushBack(true);
-        list.pushBack(false);
-        assertFalse(list.popBack());
+        Object obj1 = new Object();
+        Object obj2 = new Object();
+        list.pushBack(obj1);
+        list.pushBack(obj2);
+        assertEquals(2, list.length());
+        assertEquals(obj2, list.popBack());
         assertEquals(1, list.length());
     }
 
     @Test
-    public void popFrontReturnsFalseWhenListEmpty() {
-        assertFalse(list.popFront());
+    public void popFrontReturnsNullWhenListEmpty() {
+        assertNull(list.popFront());
     }
 
     @Test
     public void popFrontReturnsTheBackNodeAndReducesTheSizeOfTheList() {
-        list.pushBack(true);
-        list.pushBack(false);
-        assertTrue(list.popFront());
+        Object obj1 = new Object();
+        Object obj2 = new Object();
+        list.pushBack(obj1);
+        list.pushBack(obj2);
+        assertEquals(2, list.length());
+        assertEquals(obj1, list.popFront());
         assertEquals(1, list.length());
     }
 
     @Test
     public void pushBackAddsTheGivenElementToTheBackOfTheListAndIncreasesListLength() {
-        list.pushBack(true);
+        Object obj1 = new Object();
+        Object obj2 = new Object();
+        list.pushBack(obj1);
         assertEquals(1, list.length());
-        list.pushBack(false);
+        list.pushBack(obj2);
         assertEquals(2, list.length());
         assertNotNull(list.peekFront());
-        assertTrue(list.peekFront().data);
-        assertFalse(list.popBack());
+        assertEquals(obj1, list.peekFront().data);
+        assertEquals(obj2, list.popBack());
     }
 }

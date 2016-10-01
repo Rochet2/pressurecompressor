@@ -9,11 +9,12 @@ package pressurecompressor.containers.linkedlist;
  * A linked list implementation
  *
  * @author rimi
+ * @param <E>
  */
-public class LinkedList {
+public class LinkedList<E> {
 
-    private Node front;
-    private Node back;
+    private Node<E> front;
+    private Node<E> back;
     private int length;
 
     /**
@@ -40,7 +41,7 @@ public class LinkedList {
      *
      * @return
      */
-    public Node peekFront() {
+    public Node<E> peekFront() {
         return front;
     }
 
@@ -49,13 +50,13 @@ public class LinkedList {
      *
      * @param b
      */
-    public void pushBack(boolean b) {
+    public void pushBack(E b) {
         ++length;
         if (back == null) {
-            front = back = new Node(b);
+            front = back = new Node<E>(b);
             return;
         }
-        back = new Node(b, back);
+        back = new Node<E>(b, back);
         back.previous.next = back;
     }
 
@@ -64,9 +65,9 @@ public class LinkedList {
      *
      * @return
      */
-    public boolean popFront() {
+    public E popFront() {
         if (length <= 1) {
-            boolean data = false;
+            E data = null;
             if (front != null) {
                 data = front.data;
             }
@@ -76,7 +77,7 @@ public class LinkedList {
             return data;
         }
         --length;
-        boolean data = front.data;
+        E data = front.data;
         front = front.next;
         front.previous.next = null;
         front.previous = null;
@@ -88,9 +89,9 @@ public class LinkedList {
      *
      * @return
      */
-    public boolean popBack() {
+    public E popBack() {
         if (length <= 1) {
-            boolean data = false;
+            E data = null;
             if (back != null) {
                 data = back.data;
             }
@@ -100,10 +101,37 @@ public class LinkedList {
             return data;
         }
         --length;
-        boolean data = back.data;
+        E data = back.data;
         back = back.previous;
         back.next.previous = null;
         back.next = null;
         return data;
+    }
+
+    /**
+     * Removes an element from the list
+     *
+     * @param e
+     * @return didRemove
+     */
+    public boolean remove(E e) {
+        if (e == null) {
+            return false;
+        }
+
+        Node<E> curr = front;
+        while (curr != null) {
+            if (e.equals(curr.data)) {
+                --length;
+                if (curr.previous != null) {
+                    curr.previous.next = curr.next;
+                }
+                if (curr.next != null) {
+                    curr.next.previous = curr.previous;
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

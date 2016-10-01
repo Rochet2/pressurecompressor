@@ -16,13 +16,13 @@ import pressurecompressor.containers.linkedlist.Node;
  */
 public class BitStorage {
 
-    private final LinkedList bitStorage;
+    private final LinkedList<Boolean> bitStorage;
 
     /**
      * Creates a new bit storage
      */
     public BitStorage() {
-        this.bitStorage = new LinkedList();
+        this.bitStorage = new LinkedList<>();
     }
 
     /**
@@ -60,7 +60,10 @@ public class BitStorage {
     public int readFront(int numberOfBitsToRead) {
         int data = 0;
         for (int i = numberOfBitsToRead - 1; i >= 0; --i) {
-            if (hasBitsToRead(1) && bitStorage.popFront()) {
+            if (!hasBitsToRead(1))
+                continue;
+            Boolean b = bitStorage.popFront();
+            if (b != null && b) {
                 data |= 1 << i;
             }
         }
@@ -111,8 +114,8 @@ public class BitStorage {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(bitStorage.length());
-        Node node = bitStorage.peekFront();
-        while (node != null) {
+        Node<Boolean> node = bitStorage.peekFront();
+        while (node != null && node.data != null) {
             sb.append(node.data ? 1 : 0);
             node = node.next;
         }

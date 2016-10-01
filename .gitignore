@@ -17,6 +17,7 @@ hs_err_pid*
 /pressurecompressor/target
 /pressurecompressor/pressurecompressor.iml
 /pressurecompressor/nbproject/
+dependency-reduced-pom.xml
 
 # Ignore temp and lock files
 *~
