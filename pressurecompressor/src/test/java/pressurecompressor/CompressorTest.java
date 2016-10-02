@@ -20,52 +20,42 @@ public class CompressorTest {
 
     @Before
     public void setUp() {
-        comp = new Compressor(8);
+        comp = new Compressor();
     }
 
     @Test
     public void compressReturnsEmptyStringWhenNullGiven() {
-        String output = comp.compress(null);
-        assertEquals("", output);
+        byte[] output = comp.compress(null, (byte)10);
+        assertArrayEquals(new byte[0], output);
     }
 
     @Test
     public void compressReturnsEmptyStringWhenEmptyStringGiven() {
-        String output = comp.compress("");
-        assertEquals("", output);
+        byte[] output = comp.compress(new byte[0], (byte)10);
+        assertArrayEquals(new byte[0], output);
     }
 
     @Test
     public void decompressReturnsEmptyStringWhenNullGiven() {
-        String output = comp.decompress(null);
-        assertEquals("", output);
+        byte[] output = comp.decompress(null);
+        assertArrayEquals(new byte[0], output);
     }
 
     @Test
     public void decompressReturnsEmptyStringWhenEmptyStringGiven() {
-        String output = comp.decompress("");
-        assertEquals("", output);
+        byte[] output = comp.decompress(new byte[0]);
+        assertArrayEquals(new byte[0], output);
     }
 
     @Test
     public void uncompressingAfteCompressingReturnsSameStringWhenAllCharactersWithNoRepetitionGiven() {
-        byte[] bytes = new byte[128];
-        for (int i = 0; i < 128; ++i) {
-            bytes[i] = (byte) i;
+        byte[] input = new byte[(int) Math.pow(2, Byte.SIZE) - 1];
+        for (int i = 0; i < Math.pow(2, Byte.SIZE) - 1; ++i) {
+            input[i] = (byte) i;
         }
-        String input = StringUtility.bytesToString(bytes);
-        String compressed = comp.compress(input);
-        String uncompressed = comp.decompress(compressed);
-        assertEquals(input, uncompressed);
-    }
-
-    @Test
-    public void uncompressingReturnsEmptyStringWhenInvalidFirstCharacterGiven() {
-        BitStorage store = new BitStorage();
-        store.writeBack(-1, 8);
-        store.writeBack(100, 8);
-        String uncompressed = comp.decompress(store.flushToString());
-        assertEquals("", uncompressed);
+        byte[] compressed = comp.compress(input, (byte)10);
+        byte[] uncompressed = comp.decompress(compressed);
+        assertArrayEquals(input, uncompressed);
     }
 
     @Test
@@ -73,34 +63,24 @@ public class CompressorTest {
         BitStorage store = new BitStorage();
         store.writeBack(100, 8);
         store.writeBack(-1, 8);
-        String uncompressed = comp.decompress(store.flushToString());
-        assertEquals("", uncompressed);
-    }
-
-    @Test
-    public void compressingNonAsciiCharactersReturnsEmptyString() {
-        byte[] bytes = new byte[256];
-        for (int i = 0; i < 256; ++i) {
-            bytes[i] = (byte) i;
-        }
-        String input = StringUtility.bytesToString(bytes);
-        String compressed = comp.compress(input);
-        assertEquals("", compressed);
+        byte[] uncompressed = comp.decompress(store.flushToBytes());
+        assertArrayEquals(new byte[0], uncompressed);
     }
 
     @Test
     public void compressingAndUncompressingSmallTextWithRepetitionReturnsSameText() {
         String input = "This is a small text that has some small repetition";
-        String compressed = comp.compress(input);
-        String uncompressed = comp.decompress(compressed);
-        assertEquals(input, uncompressed);
+        byte[] compressed = comp.compress(input.getBytes(), (byte)10);
+        byte[] uncompressed = comp.decompress(compressed);
+        assertEquals(input, new String(uncompressed));
     }
 
     @Test
-    public void compressingSmallTextWithRepetitionReturnsSmallerText() {
-        String input = "This is a small string that has some small repetition";
-        String compressed = comp.compress(input);
-        assertTrue(compressed.length() < input.length());
+    public void compressingAndUncompressingSmallTextWithScandicLettersReturnsSameText() {
+        String input = "Onpa mukava päivä tänään, vähän kylmä";
+        byte[] compressed = comp.compress(input.getBytes(), (byte)10);
+        byte[] uncompressed = comp.decompress(compressed);
+        assertEquals(input, new String(uncompressed));
     }
 
 }

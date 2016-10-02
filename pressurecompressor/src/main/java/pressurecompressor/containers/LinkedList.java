@@ -3,17 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pressurecompressor.containers.linkedlist;
+package pressurecompressor.containers;
+
+import pressurecompressor.containers.nodetypes.Node;
 
 /**
  * A linked list implementation
  *
  * @author rimi
+ * @param <E> type of contained elements
  */
-public class LinkedList {
+public class LinkedList<E> {
 
-    private Node front;
-    private Node back;
+    private Node<E> front;
+    private Node<E> back;
     private int length;
 
     /**
@@ -40,23 +43,29 @@ public class LinkedList {
      *
      * @return
      */
-    public Node peekFront() {
+    public Node<E> peekFront() {
         return front;
     }
 
     /**
      * Adds an element to the back of the list with the given value
      *
-     * @param b
+     * @param e
+     * @return
      */
-    public void pushBack(boolean b) {
+    public Node<E> pushBack(E e) {
         ++length;
-        if (back == null) {
-            front = back = new Node(b);
-            return;
+        if (length == 1) {
+            front = new Node<>(e);
+            back = front;
+            return back;
         }
-        back = new Node(b, back);
-        back.previous.next = back;
+        Node<E> prev = back;
+        back = new Node<>(e, prev);
+        if (prev != null) {
+            prev.next = back;
+        }
+        return back;
     }
 
     /**
@@ -64,9 +73,9 @@ public class LinkedList {
      *
      * @return
      */
-    public boolean popFront() {
+    public E popFront() {
         if (length <= 1) {
-            boolean data = false;
+            E data = null;
             if (front != null) {
                 data = front.data;
             }
@@ -76,9 +85,11 @@ public class LinkedList {
             return data;
         }
         --length;
-        boolean data = front.data;
+        E data = front.data;
         front = front.next;
-        front.previous.next = null;
+        if (front.previous != null) {
+            front.previous.next = null;
+        }
         front.previous = null;
         return data;
     }
@@ -88,9 +99,9 @@ public class LinkedList {
      *
      * @return
      */
-    public boolean popBack() {
+    public E popBack() {
         if (length <= 1) {
-            boolean data = false;
+            E data = null;
             if (back != null) {
                 data = back.data;
             }
@@ -100,9 +111,11 @@ public class LinkedList {
             return data;
         }
         --length;
-        boolean data = back.data;
+        E data = back.data;
         back = back.previous;
-        back.next.previous = null;
+        if (back.next != null) {
+            back.next.previous = null;
+        }
         back.next = null;
         return data;
     }

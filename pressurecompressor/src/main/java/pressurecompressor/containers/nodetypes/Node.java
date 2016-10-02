@@ -3,16 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pressurecompressor.containers.linkedlist;
+package pressurecompressor.containers.nodetypes;
 
 /**
  * An element used in linked lists
  *
  * @author rimi
+ * @param <E> type of contained data
  */
-public class Node {
+public class Node<E> {
 
-    public boolean data;
+    public E data;
     public Node previous;
     public Node next;
 
@@ -21,7 +22,7 @@ public class Node {
      *
      * @param data
      */
-    public Node(boolean data) {
+    public Node(E data) {
         this(data, null);
     }
 
@@ -31,8 +32,9 @@ public class Node {
      * @param data
      * @param previous
      */
-    public Node(boolean data, Node previous) {
+    public Node(E data, Node previous) {
         this.data = data;
         this.previous = previous;
     }
+
 }

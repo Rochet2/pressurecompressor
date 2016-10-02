@@ -5,15 +5,18 @@
  */
 package pressurecompressor.containers;
 
+import pressurecompressor.containers.nodetypes.Node;
+import pressurecompressor.containers.nodetypes.Pair;
+
 /**
- * A class that handles keeping a dictionary of strings mapped to numbers
+ * A class that handles keeping a dictionary of elements mapped to numbers.
  *
  * @author rimi
  */
 public class Dictionary {
 
-    private final String[] dictionary;
-    private int elements = 0;
+    private final ByteSequence[] bytes;
+    private int elements;
 
     /**
      * Creates a new dictionary that can contain at maximum given amount of
@@ -22,21 +25,22 @@ public class Dictionary {
      * @param amountOfElements
      */
     public Dictionary(int amountOfElements) {
-        this.dictionary = new String[amountOfElements];
+        this.elements = 0;
+        this.bytes = new ByteSequence[amountOfElements];
     }
 
     /**
-     * Returns the index of the given string from dictionary or null
+     * Returns the index of the given element from dictionary or null.
      *
-     * @param string
+     * @param bs
      * @return
      */
-    public Integer get(String string) {
-        if (string == null) {
+    public Integer get(ByteSequence bs) {
+        if (bs == null) {
             return null;
         }
         for (int i = 0; i < elements; ++i) {
-            if (string.equals(dictionary[i])) {
+            if (bytes[i].equals(bs)) {
                 return i;
             }
         }
@@ -44,32 +48,35 @@ public class Dictionary {
     }
 
     /**
-     * Returns the string at given index or null
+     * Returns the element at given index or null
      *
      * @param index Indexes start from 0
      * @return
      */
-    public String get(int index) {
+    public ByteSequence get(int index) {
         if (index >= elements) {
             return null;
         }
         if (index < 0) {
             return null;
         }
-        return dictionary[index];
+        return bytes[index];
     }
 
     /**
-     * Adds a new string to the dictionary if it is not full.
+     * Adds a element to the dictionary if the element is not null. If the
+     * dictionary is completely full it is cleared.
      *
-     * @param string
+     * @param bs
      */
-    public void add(String string) {
-        if (isFull() || string == null) {
+    public void add(ByteSequence bs) {
+        if (bs == null) {
             return;
         }
-        dictionary[elements] = string;
-        ++elements;
+        if (!isFull()) {
+            bytes[elements] = bs;
+            ++elements;
+        }
     }
 
     /**
@@ -78,26 +85,21 @@ public class Dictionary {
      * @return
      */
     public boolean isFull() {
-        return elements >= dictionary.length;
+        return elements >= bytes.length;
     }
 
     /**
-     * Returns the dictionary as a string representation.
-     *
-     * The format of the string is [key]=value and these are separated by a
-     * space. The string ends with a space.
-     *
-     * @return
+     * Clears and initializes the storage
      */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < elements; ++i) {
-            sb.append("[").append(i).append("]=");
-            sb.append(dictionary[i]);
-            sb.append(" ");
+    public void reset() {
+        this.elements = 0;
+        for (int i = 0; i < (int) Math.pow(2, Byte.SIZE); ++i) {
+            if (isFull()) {
+                break;
+            }
+            bytes[elements] = new ByteSequence(new byte[]{(byte) i});
+            ++elements;
         }
-        return sb.toString();
     }
 
 }
