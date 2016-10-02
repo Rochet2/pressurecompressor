@@ -6,6 +6,7 @@
 package pressurecompressor.containers;
 
 /**
+ * A class for storing variable length byte arrays
  *
  * @author rochet2_2
  */
@@ -13,14 +14,27 @@ public class ByteSequence {
 
     private final byte[] bytes;
 
+    /**
+     * Creates a new empty byte sequence
+     */
     public ByteSequence() {
         this(new byte[0]);
     }
 
+    /**
+     * Creates a new byte sequence containing given bytes
+     *
+     * @param bytes
+     */
     public ByteSequence(byte[] bytes) {
         this.bytes = bytes;
     }
 
+    /**
+     * Returns the bytes contained by the sequence
+     *
+     * @return
+     */
     public byte[] getBytes() {
         return this.bytes;
     }
@@ -45,6 +59,13 @@ public class ByteSequence {
         return true;
     }
 
+    /**
+     * Joins the two inputs into one
+     *
+     * @param a
+     * @param b
+     * @return
+     */
     public static ByteSequence join(ByteSequence a, ByteSequence b) {
         byte[] temp = new byte[a.bytes.length + b.bytes.length];
         int index = 0;

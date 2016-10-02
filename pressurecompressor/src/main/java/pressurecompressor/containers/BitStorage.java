@@ -88,6 +88,11 @@ public class BitStorage {
         return bitStorage.length();
     }
 
+    /**
+     * Turns the storage into a byte array and empties the storage
+     *
+     * @return
+     */
     public byte[] flushToBytes() {
         byte[] bytes = new byte[(int) Math.ceil(bitStorage.length() / (double) Byte.SIZE)];
         int written = 0;

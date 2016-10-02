@@ -14,11 +14,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * A class for file operations
  *
  * @author rimi
  */
 public class FileUtility {
 
+    /**
+     * Returns all bytes (raw) from the given file. Returns an empty array if
+     * there were errors
+     *
+     * @param filePath
+     * @return
+     */
     static byte[] readFile(String filePath) {
         Path path = Paths.get(filePath);
         try {
@@ -30,6 +38,12 @@ public class FileUtility {
         return new byte[0];
     }
 
+    /**
+     * Writes given bytes to the file
+     *
+     * @param filePath
+     * @param bytes
+     */
     static void writeFile(String filePath, byte[] bytes) {
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             fos.write(bytes);

@@ -6,11 +6,20 @@
 package pressurecompressor.containers.nodetypes;
 
 /**
+ * A tuple
  *
  * @author rochet2_2
+ * @param <F> type of first element
+ * @param <S> type of second element
  */
 public class Pair<F, S> extends Object {
 
+    /**
+     * Creates a new Pair with given values as first and second
+     *
+     * @param first
+     * @param second
+     */
     public Pair(F first, S second) {
         this.first = first;
         this.second = second;

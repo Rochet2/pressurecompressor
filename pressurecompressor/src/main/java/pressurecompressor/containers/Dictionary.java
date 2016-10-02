@@ -9,7 +9,8 @@ import pressurecompressor.containers.nodetypes.Node;
 import pressurecompressor.containers.nodetypes.Pair;
 
 /**
- * A class that handles keeping a dictionary of strings mapped to numbers
+ * A class that handles keeping a dictionary of elements mapped to numbers.
+ * There is an LRU cache for when the dictionary gets full
  *
  * @author rimi
  */
@@ -17,7 +18,6 @@ public class Dictionary {
 
     // Front has least recently used
     private final LinkedList<Integer> lru;
-    private final int maxSize;
     private final Object[] bytes; // Pair<ByteSequence, Node<Integer>>
     private int elements;
 
@@ -29,18 +29,24 @@ public class Dictionary {
      */
     public Dictionary(int amountOfElements) {
         this.elements = 0;
-        this.maxSize = amountOfElements;
         this.lru = new LinkedList<>();
-        this.bytes = new Object[this.maxSize];
-        ByteSequence[] array = new ByteSequence[100];
+        this.bytes = new Object[amountOfElements];
     }
 
-    private Pair<ByteSequence, Node<Integer>> g(int index) {
+    /**
+     * An utility function for getting the element at given index and casting it
+     * to element type
+     *
+     * @param index
+     * @return
+     */
+    private Pair<ByteSequence, Node<Integer>> getElementAt(int index) {
         return (Pair<ByteSequence, Node<Integer>>) bytes[index];
     }
 
     /**
-     * Returns the index of the given string from dictionary or null
+     * Returns the index of the given element from dictionary or null. Also
+     * updates the element to be on top of LRU cache.
      *
      * @param bs
      * @return
@@ -50,9 +56,9 @@ public class Dictionary {
             return null;
         }
         for (int i = 0; i < elements; ++i) {
-            if (g(i).first.equals(bs)) {
-                if (g(i).second != null) {
-                    lru.remove(g(i).second);
+            if (getElementAt(i).first.equals(bs)) {
+                if (getElementAt(i).second != null) {
+                    lru.remove(getElementAt(i).second);
                     lru.pushBack(i);
                 }
                 return i;
@@ -62,7 +68,8 @@ public class Dictionary {
     }
 
     /**
-     * Returns the element at given index or null
+     * Returns the element at given index or null Also updates the element to be
+     * on top of LRU cache.
      *
      * @param index Indexes start from 0
      * @return
@@ -74,16 +81,18 @@ public class Dictionary {
         if (index < 0) {
             return null;
         }
-        if (g(index).second != null) {
-            lru.remove(g(index).second);
+        if (getElementAt(index).second != null) {
+            lru.remove(getElementAt(index).second);
             lru.pushBack(index);
         }
-        return g(index).first;
+        return getElementAt(index).first;
     }
 
     /**
-     * Adds a element to the dictionary if the element is not null. May remove
-     * an older element.
+     * Adds a element to the dictionary if the element is not null. If the
+     * dictionary is completely full, no elements are added. Adds the element to
+     * the top of the LRU cache if LRU is applied. May remove an older element
+     * from LRU cache if dictionary is full.
      *
      * @param bs
      * @param applyLru
@@ -110,7 +119,7 @@ public class Dictionary {
      * @return
      */
     public boolean isFull() {
-        return elements >= maxSize;
+        return elements >= bytes.length;
     }
 
 }

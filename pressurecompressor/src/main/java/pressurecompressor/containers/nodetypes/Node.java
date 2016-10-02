@@ -9,6 +9,7 @@ package pressurecompressor.containers.nodetypes;
  * An element used in linked lists
  *
  * @author rimi
+ * @param <E> type of contained data
  */
 public class Node<E> {
 
@@ -34,11 +35,6 @@ public class Node<E> {
     public Node(E data, Node previous) {
         this.data = data;
         this.previous = previous;
-    }
-
-    @Override
-    public String toString() {
-        return data.toString();
     }
 
 }

@@ -18,27 +18,21 @@ import pressurecompressor.containers.nodetypes.Node;
  */
 public class Compressor {
 
-    private final int codeBitLength;
-    private final int dictionarySize;
-
-    public Compressor(int codeBitLength) {
-        this.codeBitLength = codeBitLength;
-        this.dictionarySize = (int) Math.pow(2, codeBitLength) - 1;
-    }
-
     /**
-     * Compresses the given string. If input is null, empty or contains non
-     * ascii bytes then an empty string is returned
+     * Compresses the given input. If input is null or empty then an empty
+     * output is returned. Uses given amount of bits to code each character.
      *
      * @param input
+     * @param codeBitLength
      * @return
      */
-    public byte[] compress(byte[] input) {
+    public byte[] compress(byte[] input, int codeBitLength) {
         if (input == null || input.length == 0) {
             return new byte[0];
         }
         BitStorage output = new BitStorage();
-        Dictionary dictionary = createDictionary();
+        output.writeBack(codeBitLength, Integer.SIZE);
+        Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength) - 1);
         ByteSequence w = new ByteSequence();
         for (byte b : input) {
             ByteSequence k = new ByteSequence(new byte[]{b});
@@ -57,8 +51,8 @@ public class Compressor {
     }
 
     /**
-     * Decompresses the given string. Input is assumed to be the output of the
-     * compress function. Returns empty string if input is null or there are not
+     * Decompresses the given input. Input is assumed to be the output of the
+     * compress function. Returns empty output if input is null or there are not
      * enough bits to decompress or if the algorithm fails
      *
      * @param input
@@ -69,10 +63,17 @@ public class Compressor {
             return new byte[0];
         }
         BitStorage store = new BitStorage(input);
+        if (!store.hasBitsToRead(Integer.SIZE)) {
+            return new byte[0];
+        }
+        int codeBitLength = store.readFront(Integer.SIZE);
+        if (codeBitLength <= 0) {
+            return new byte[0];
+        }
         if (!store.hasBitsToRead(codeBitLength)) {
             return new byte[0];
         }
-        Dictionary dictionary = createDictionary();
+        Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength) - 1);
         LinkedList<ByteSequence> result = new LinkedList<>();
         int k = store.readFront(codeBitLength);
         ByteSequence entry = dictionary.get(k);
@@ -85,7 +86,10 @@ public class Compressor {
             k = store.readFront(codeBitLength);
             entry = dictionary.get(k);
             if (entry == null) {
-                return new byte[0];
+                dictionary.add(ByteSequence.join(w, new ByteSequence()), true);
+                w = new ByteSequence();
+                continue;
+                // return new byte[0];
             }
             result.pushBack(entry);
             dictionary.add(ByteSequence.join(w, new ByteSequence(new byte[]{entry.getBytes()[0]})), true);
@@ -95,11 +99,13 @@ public class Compressor {
     }
 
     /**
-     * Creates a dictionary of a specific size.
+     * Creates a dictionary of a specific size. The returned dictionary contains
+     * all one byte size sequences
      *
+     * @param dictionarySize
      * @return
      */
-    private Dictionary createDictionary() {
+    private Dictionary createDictionary(int dictionarySize) {
         Dictionary map = new Dictionary(dictionarySize);
         for (int i = 0; i < (int) Math.pow(2, Byte.SIZE) - 1; ++i) {
             map.add(new ByteSequence(new byte[]{(byte) i}), false);
@@ -107,6 +113,12 @@ public class Compressor {
         return map;
     }
 
+    /**
+     * Returns a byte array containing all the bytes from the input
+     *
+     * @param bytes
+     * @return
+     */
     private static byte[] toBytes(LinkedList<ByteSequence> bytes) {
         int byteCount = 0;
         Node<ByteSequence> curr = bytes.peekFront();

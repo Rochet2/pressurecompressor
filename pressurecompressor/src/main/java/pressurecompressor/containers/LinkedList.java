@@ -11,7 +11,7 @@ import pressurecompressor.containers.nodetypes.Node;
  * A linked list implementation
  *
  * @author rimi
- * @param <E>
+ * @param <E> type of contained elements
  */
 public class LinkedList<E> {
 
@@ -50,16 +50,16 @@ public class LinkedList<E> {
     /**
      * Adds an element to the back of the list with the given value
      *
-     * @param b
+     * @param e
      * @return
      */
-    public Node<E> pushBack(E b) {
+    public Node<E> pushBack(E e) {
         ++length;
         if (back == null) {
-            front = back = new Node<>(b);
+            front = back = new Node<>(e);
             return back;
         }
-        back = new Node<>(b, back);
+        back = new Node<>(e, back);
         back.previous.next = back;
         return back;
     }
@@ -113,20 +113,21 @@ public class LinkedList<E> {
     }
 
     /**
-     * Removes the element from the list
+     * Removes the element from any list if it is in any and reduces this list's
+     * length
      *
-     * @param elem
+     * @param n
      */
-    public void remove(Node<E> elem) {
-        if (elem == null) {
+    public void remove(Node<E> n) {
+        if (n == null) {
             return;
         }
         --length;
-        if (elem.previous != null) {
-            elem.previous.next = elem.next;
+        if (n.previous != null) {
+            n.previous.next = n.next;
         }
-        if (elem.next != null) {
-            elem.next.previous = elem.previous;
+        if (n.next != null) {
+            n.next.previous = n.previous;
         }
     }
 }
