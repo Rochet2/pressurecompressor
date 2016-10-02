@@ -6,7 +6,10 @@
 package pressurecompressor;
 
 import pressurecompressor.containers.BitStorage;
+import pressurecompressor.containers.ByteSequence;
 import pressurecompressor.containers.Dictionary;
+import pressurecompressor.containers.LinkedList;
+import pressurecompressor.containers.nodetypes.Node;
 
 /**
  * A class for compressing and decompressing data
@@ -30,29 +33,27 @@ public class Compressor {
      * @param input
      * @return
      */
-    public String compress(String input) {
-        if (input == null || input.isEmpty()
-                || StringUtility.hasNonAsciiCharacters(StringUtility.stringToBytes(input))) {
-            return "";
+    public byte[] compress(byte[] input) {
+        if (input == null || input.length == 0) {
+            return new byte[0];
         }
         BitStorage output = new BitStorage();
         Dictionary dictionary = createDictionary();
-        {
-            String w = "";
-            for (byte b : StringUtility.stringToBytes(input)) {
-                String k = StringUtility.bytesToString(new byte[]{b});
-                String wk = w + k;
-                if (dictionary.get(wk) != null) {
-                    w = wk;
-                } else {
-                    dictionary.add(wk);
-                    output.writeBack(dictionary.get(w), codeBitLength);
-                    w = k;
-                }
+        ByteSequence w = new ByteSequence();
+        for (byte b : input) {
+            ByteSequence k = new ByteSequence(new byte[]{b});
+            ByteSequence wk = ByteSequence.join(w, k);
+
+            if (dictionary.get(wk) != null) {
+                w = wk;
+            } else {
+                dictionary.add(wk, true);
+                output.writeBack(dictionary.get(w), codeBitLength);
+                w = k;
             }
         }
-        output.writeBack(input.charAt(input.length() - 1), codeBitLength);
-        return output.flushToString();
+        output.writeBack(input[input.length - 1], codeBitLength);
+        return output.flushToBytes();
     }
 
     /**
@@ -63,34 +64,34 @@ public class Compressor {
      * @param input
      * @return
      */
-    public String decompress(String input) {
+    public byte[] decompress(byte[] input) {
         if (input == null) {
-            return "";
+            return new byte[0];
         }
         BitStorage store = new BitStorage(input);
         if (!store.hasBitsToRead(codeBitLength)) {
-            return "";
+            return new byte[0];
         }
         Dictionary dictionary = createDictionary();
-        StringBuilder result = new StringBuilder();
+        LinkedList<ByteSequence> result = new LinkedList<>();
         int k = store.readFront(codeBitLength);
-        String entry = dictionary.get(k);
+        ByteSequence entry = dictionary.get(k);
         if (entry == null) {
-            return "";
+            return new byte[0];
         }
-        result.append(entry);
-        String w = Character.toString((char) k);
+        result.pushBack(entry);
+        ByteSequence w = entry;
         while (store.hasBitsToRead(codeBitLength)) {
             k = store.readFront(codeBitLength);
             entry = dictionary.get(k);
             if (entry == null) {
-                return "";
+                return new byte[0];
             }
-            result.append(entry);
-            dictionary.add(w + entry.charAt(0));
+            result.pushBack(entry);
+            dictionary.add(ByteSequence.join(w, new ByteSequence(new byte[]{entry.getBytes()[0]})), true);
             w = entry;
         }
-        return result.toString();
+        return toBytes(result);
     }
 
     /**
@@ -100,13 +101,29 @@ public class Compressor {
      */
     private Dictionary createDictionary() {
         Dictionary map = new Dictionary(dictionarySize);
-        for (char i = 0; i <= Byte.MAX_VALUE; ++i) {
-            String key = Character.toString(i);
-            if (map.get(key) == null) {
-                map.add(key);
-            }
+        for (int i = 0; i < (int) Math.pow(2, Byte.SIZE) - 1; ++i) {
+            map.add(new ByteSequence(new byte[]{(byte) i}), false);
         }
         return map;
+    }
+
+    private static byte[] toBytes(LinkedList<ByteSequence> bytes) {
+        int byteCount = 0;
+        Node<ByteSequence> curr = bytes.peekFront();
+        while (curr != null) {
+            byteCount += curr.data.getBytes().length;
+            curr = curr.next;
+        }
+        byte[] temp = new byte[byteCount];
+        int i = 0;
+        curr = bytes.peekFront();
+        while (curr != null) {
+            for (byte b : curr.data.getBytes()) {
+                temp[i++] = b;
+            }
+            curr = curr.next;
+        }
+        return temp;
     }
 
 }

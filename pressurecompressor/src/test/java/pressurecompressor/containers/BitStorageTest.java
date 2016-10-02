@@ -6,8 +6,8 @@
 package pressurecompressor.containers;
 
 import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -24,16 +24,16 @@ public class BitStorageTest {
 
     @Test
     public void flushToStringReturnsEmptyStringWhenStorageEmpty() {
-        assertEquals("", store.flushToString());
+        assertArrayEquals(new byte[0], store.flushToBytes());
     }
 
     @Test
     public void flushToStringReturnsBitsInterpretedAsStringWhenStorageContainsElements() {
-        String expected = "abc";
-        for (char c : expected.toCharArray()) {
-            store.writeBack(c, Byte.SIZE);
+        byte[] expected = {1, 2, 3};
+        for (byte b : expected) {
+            store.writeBack(b, Byte.SIZE);
         }
-        assertEquals(expected, store.flushToString());
+        assertArrayEquals(expected, store.flushToBytes());
     }
 
     @Test

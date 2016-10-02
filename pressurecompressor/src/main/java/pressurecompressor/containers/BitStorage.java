@@ -5,9 +5,7 @@
  */
 package pressurecompressor.containers;
 
-import pressurecompressor.StringUtility;
-import pressurecompressor.containers.linkedlist.LinkedList;
-import pressurecompressor.containers.linkedlist.Node;
+import pressurecompressor.containers.nodetypes.Node;
 
 /**
  * A class for storing and handling bits
@@ -30,10 +28,9 @@ public class BitStorage {
      *
      * @param input
      */
-    public BitStorage(String input) {
+    public BitStorage(byte[] input) {
         this();
-        byte[] temp = StringUtility.stringToBytes(input);
-        for (byte b : temp) {
+        for (byte b : input) {
             writeBack(b, Byte.SIZE);
         }
     }
@@ -60,8 +57,9 @@ public class BitStorage {
     public int readFront(int numberOfBitsToRead) {
         int data = 0;
         for (int i = numberOfBitsToRead - 1; i >= 0; --i) {
-            if (!hasBitsToRead(1))
+            if (!hasBitsToRead(1)) {
                 continue;
+            }
             Boolean b = bitStorage.popFront();
             if (b != null && b) {
                 data |= 1 << i;
@@ -90,19 +88,14 @@ public class BitStorage {
         return bitStorage.length();
     }
 
-    /**
-     * Returns the stored bits reinterpreted as text and empties the storage.
-     *
-     * @return
-     */
-    public String flushToString() {
+    public byte[] flushToBytes() {
         byte[] bytes = new byte[(int) Math.ceil(bitStorage.length() / (double) Byte.SIZE)];
         int written = 0;
         while (hasBitsToRead(1)) {
             int value = readFront(Byte.SIZE);
             bytes[written++] = (byte) value;
         }
-        return StringUtility.bytesToString(bytes);
+        return bytes;
     }
 
     /**

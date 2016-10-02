@@ -5,12 +5,6 @@
  */
 package pressurecompressor;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 /**
@@ -18,41 +12,6 @@ import java.util.Arrays;
  * @author rimi
  */
 public class pressurecompressor {
-
-    /**
-     * Creates a file or overwrites existing file with given content
-     *
-     * @param fileName name of the file to write to
-     * @param content content of the file
-     */
-    public static void Write(String fileName, String content) {
-        try (PrintWriter writer = new PrintWriter(fileName, "ISO-8859-1")) {
-            writer.println(content);
-        } catch (FileNotFoundException | UnsupportedEncodingException ex) {
-            System.out.println("Could not write to " + fileName + ": " + ex.getMessage());
-        }
-    }
-
-    public static String Read(String fileName) {
-        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-            if (line != null) {
-                sb.append(line);
-            }
-
-            line = br.readLine();
-            while (line != null) {
-                sb.append(System.lineSeparator());
-                sb.append(line);
-                line = br.readLine();
-            }
-            return sb.toString();
-        } catch (IOException ex) {
-            System.out.println("Could not read " + fileName + ": " + ex.getMessage());
-        }
-        return null;
-    }
 
     public static void printHelp() {
         System.out.println("Usage: compress|decompress file bits");
@@ -70,23 +29,22 @@ public class pressurecompressor {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         if (true) {
             // test code here
-            Compressor comp = new Compressor(8);
+            Compressor comp = new Compressor(9);
             System.out.println(Arrays.toString(args));
-            Write("testfile.txt", Arrays.toString(args));
             String input = "^WED^WE^WEE^WEB^WET";
             System.out.println("original: " + input);
 
-            String compressed = comp.compress(input);
+            byte[] compressed = comp.compress(input.getBytes());
             System.out.println("input length: " + input.length());
-            System.out.println("compressed length: " + compressed.length());
-            System.out.println("compressed string is " + (compressed.length() / (float) input.length() * 100) + "% of the original");
+            System.out.println("compressed length: " + compressed.length);
+            System.out.println("compressed string is " + (compressed.length / (float) input.length() * 100) + "% of the original");
 
-            String uncompressed = comp.decompress(compressed);
-            System.out.println("uncompressed: " + uncompressed);
+            byte[] uncompressed = comp.decompress(compressed);
+            System.out.println("uncompressed: " + new String(uncompressed));
             return;
         }
 
@@ -103,15 +61,15 @@ public class pressurecompressor {
             }
         }
         Compressor comp = new Compressor(bits);
-        String input = Read(args[1]);
+        byte[] input = FileUtility.readFile(args[1]);
         if ("compress".startsWith(args[0])) {
-            String output = comp.compress(input);
-            Write(args[1] + ".compr", output);
-            printResults(input.length(), output.length());
+            byte[] output = comp.compress(input);
+            FileUtility.writeFile(args[1] + ".compr", output);
+            printResults(input.length, output.length);
         } else if ("decompress".startsWith(args[0])) {
-            String output = comp.decompress(input);
-            Write(args[1] + ".decom", output);
-            printResults(input.length(), output.length());
+            byte[] output = comp.decompress(input);
+            FileUtility.writeFile(args[1] + ".decom", output);
+            printResults(input.length, output.length);
         } else {
             printHelp();
         }

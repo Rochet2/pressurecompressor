@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pressurecompressor.containers.linkedlist;
+package pressurecompressor.containers;
+
+import pressurecompressor.containers.nodetypes.Node;
 
 /**
  * A linked list implementation
@@ -49,15 +51,17 @@ public class LinkedList<E> {
      * Adds an element to the back of the list with the given value
      *
      * @param b
+     * @return
      */
-    public void pushBack(E b) {
+    public Node<E> pushBack(E b) {
         ++length;
         if (back == null) {
-            front = back = new Node<E>(b);
-            return;
+            front = back = new Node<>(b);
+            return back;
         }
-        back = new Node<E>(b, back);
+        back = new Node<>(b, back);
         back.previous.next = back;
+        return back;
     }
 
     /**
@@ -109,29 +113,20 @@ public class LinkedList<E> {
     }
 
     /**
-     * Removes an element from the list
+     * Removes the element from the list
      *
-     * @param e
-     * @return didRemove
+     * @param elem
      */
-    public boolean remove(E e) {
-        if (e == null) {
-            return false;
+    public void remove(Node<E> elem) {
+        if (elem == null) {
+            return;
         }
-
-        Node<E> curr = front;
-        while (curr != null) {
-            if (e.equals(curr.data)) {
-                --length;
-                if (curr.previous != null) {
-                    curr.previous.next = curr.next;
-                }
-                if (curr.next != null) {
-                    curr.next.previous = curr.previous;
-                }
-                return true;
-            }
+        --length;
+        if (elem.previous != null) {
+            elem.previous.next = elem.next;
         }
-        return false;
+        if (elem.next != null) {
+            elem.next.previous = elem.previous;
+        }
     }
 }

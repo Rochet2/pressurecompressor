@@ -5,8 +5,8 @@
  */
 package pressurecompressor.containers;
 
-import pressurecompressor.StringUtility;
-import pressurecompressor.containers.linkedlist.LinkedList;
+import pressurecompressor.containers.nodetypes.Node;
+import pressurecompressor.containers.nodetypes.Pair;
 
 /**
  * A class that handles keeping a dictionary of strings mapped to numbers
@@ -15,8 +15,11 @@ import pressurecompressor.containers.linkedlist.LinkedList;
  */
 public class Dictionary {
 
-    private final LinkedList<String> lru;
-    private int elements = 0;
+    // Front has least recently used
+    private final LinkedList<Integer> lru;
+    private final int maxSize;
+    private final Object[] bytes; // Pair<ByteSequence, Node<Integer>>
+    private int elements;
 
     /**
      * Creates a new dictionary that can contain at maximum given amount of
@@ -25,58 +28,80 @@ public class Dictionary {
      * @param amountOfElements
      */
     public Dictionary(int amountOfElements) {
+        this.elements = 0;
+        this.maxSize = amountOfElements;
         this.lru = new LinkedList<>();
+        this.bytes = new Object[this.maxSize];
+        ByteSequence[] array = new ByteSequence[100];
+    }
+
+    private Pair<ByteSequence, Node<Integer>> g(int index) {
+        return (Pair<ByteSequence, Node<Integer>>) bytes[index];
     }
 
     /**
      * Returns the index of the given string from dictionary or null
      *
-     * @param string
+     * @param bs
      * @return
      */
-    public Integer get(String string) {
-        if (string == null) {
+    public Integer get(ByteSequence bs) {
+        if (bs == null) {
             return null;
         }
-        if (lru.remove(string)) {
-            lru.pushBack(string);
-            return elements;
+        for (int i = 0; i < elements; ++i) {
+            if (g(i).first.equals(bs)) {
+                if (g(i).second != null) {
+                    lru.remove(g(i).second);
+                    lru.pushBack(i);
+                }
+                return i;
+            }
         }
         return null;
     }
 
     /**
-     * Returns the string at given index or null
+     * Returns the element at given index or null
      *
      * @param index Indexes start from 0
      * @return
      */
-    public String get(int index) {
+    public ByteSequence get(int index) {
         if (index >= elements) {
             return null;
         }
         if (index < 0) {
             return null;
         }
-        return dictionary[index];
+        if (g(index).second != null) {
+            lru.remove(g(index).second);
+            lru.pushBack(index);
+        }
+        return g(index).first;
     }
 
     /**
-     * Adds a new string to the dictionary if it is not full.
+     * Adds a element to the dictionary if the element is not null. May remove
+     * an older element.
      *
-     * @param string
+     * @param bs
+     * @param applyLru
      */
-    public void add(String string) {
-        System.out.println(string);
+    public void add(ByteSequence bs, boolean applyLru) {
+        if (bs == null) {
+            return;
+        }
         if (isFull()) {
-            System.out.println("full");
-            return;
+            Integer index = lru.popFront();
+            if (index == null) {
+                return;
+            }
+            bytes[index] = new Pair<>(bs, applyLru ? lru.pushBack(index) : null);
+        } else {
+            bytes[elements] = new Pair<>(bs, applyLru ? lru.pushBack(elements) : null);
+            ++elements;
         }
-        if (string == null) {
-            return;
-        }
-        dictionary[elements] = string;
-        ++elements;
     }
 
     /**
@@ -85,26 +110,7 @@ public class Dictionary {
      * @return
      */
     public boolean isFull() {
-        return elements >= dictionary.length;
-    }
-
-    /**
-     * Returns the dictionary as a string representation.
-     *
-     * The format of the string is [key]=value and these are separated by a
-     * space. The string ends with a space.
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < elements; ++i) {
-            sb.append("[").append(i).append("]=");
-            sb.append(dictionary[i]);
-            sb.append(" ");
-        }
-        return sb.toString();
+        return elements >= maxSize;
     }
 
 }

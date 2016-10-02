@@ -16,26 +16,32 @@ import static org.junit.Assert.*;
 public class DictionaryTest {
 
     private Dictionary dict;
+    private ByteSequence bs1;
+    private ByteSequence bs2;
+    private ByteSequence bs3;
 
     @Before
     public void setUp() {
-        dict = new Dictionary(3);
+        this.dict = new Dictionary(3);
+        this.bs1 = new ByteSequence(new byte[]{1});
+        this.bs2 = new ByteSequence(new byte[]{2});
+        this.bs3 = new ByteSequence(new byte[]{3});
     }
 
     @Test
     public void isFullReturnsFalseWhenDictHasSpace() {
         assertFalse(dict.isFull());
-        dict.add("1");
+        dict.add(bs1, true);
         assertFalse(dict.isFull());
-        dict.add("2");
+        dict.add(bs2, true);
         assertFalse(dict.isFull());
     }
 
     @Test
     public void isFullReturnsTrueWhenDictIsFull() {
-        dict.add("1");
-        dict.add("2");
-        dict.add("3");
+        dict.add(bs1, true);
+        dict.add(bs2, true);
+        dict.add(bs3, true);
         assertTrue(dict.isFull());
     }
 
@@ -46,14 +52,14 @@ public class DictionaryTest {
 
     @Test
     public void getWithNonExistentStringReturnsNull() {
-        assertNull(dict.get("nonexistent"));
+        assertNull(dict.get(bs1));
     }
 
     @Test
     public void getWithExistingStringReturnsCorrespondingIndex() {
-        String[] input = {"a", "b", "c"};
-        for (String string : input) {
-            dict.add(string);
+        ByteSequence[] input = {bs1, bs2, bs3};
+        for (ByteSequence bs : input) {
+            dict.add(bs, true);
         }
         for (int i = 0; i < input.length; ++i) {
             assertEquals(i, dict.get(input[i]).intValue());
@@ -77,50 +83,50 @@ public class DictionaryTest {
 
     @Test
     public void getWithJustAboveExactElementCountReturnsNull() {
-        dict.add("test");
+        dict.add(bs1, true);
         assertNull(dict.get(1));
     }
 
     @Test
     public void getWithExactElementCountReturnsElement() {
-        String input = "test";
-        dict.add(input);
+        ByteSequence input = bs1;
+        dict.add(input, true);
         assertEquals(input, dict.get(0));
     }
 
     @Test
     public void getWithNegativeElementCountReturnsNull() {
-        dict.add("test");
+        dict.add(bs1, true);
         assertNull(dict.get(-1));
     }
 
     @Test
     public void getWithJustAboveExactElementCountReturnsNullWhenTwoElementsInDict() {
-        dict.add("abc");
-        dict.add("def");
+        dict.add(bs1, true);
+        dict.add(bs2, true);
         assertNull(dict.get(2));
     }
 
     @Test
     public void getWithValidIndexReturnsElementWhenTwoElementsInDict() {
-        dict.add("abc");
-        dict.add("def");
-        assertEquals("abc", dict.get(0));
-        assertEquals("def", dict.get(1));
+        dict.add(bs1, true);
+        dict.add(bs2, true);
+        assertEquals(bs1, dict.get(0));
+        assertEquals(bs2, dict.get(1));
     }
 
     @Test
     public void getWithNegativeElementCountReturnsNullWhenTwoElementsInList() {
-        dict.add("abc");
-        dict.add("def");
+        dict.add(bs1, true);
+        dict.add(bs2, true);
         assertNull(dict.get(-1));
     }
 
     @Test
     public void getWithExistingIndexReturnsCorrespondingString() {
-        String[] input = {"a", "b", "c"};
-        for (String string : input) {
-            dict.add(string);
+        ByteSequence[] input = {bs1, bs2, bs3};
+        for (ByteSequence bs : input) {
+            dict.add(bs, true);
         }
         for (int i = 0; i < input.length; ++i) {
             assertEquals(input[i], dict.get(i));
@@ -130,43 +136,17 @@ public class DictionaryTest {
     @Test
     public void addDoesNotAddWhenFull() {
         dict = new Dictionary(0);
-        dict.add("test");
+        dict.add(bs1, true);
         assertTrue(dict.isFull());
-        assertNull(dict.get("test"));
+        assertNull(dict.get(bs1));
     }
 
     @Test
     public void addDoesNotAddNull() {
         dict = new Dictionary(1);
-        dict.add(null);
+        dict.add(null, true);
         assertFalse(dict.isFull());
         assertNull(dict.get(null));
-    }
-
-    @Test
-    public void toStringReturnsEmptyStringWithEmptyDictionary() {
-        assertEquals("", dict.toString());
-    }
-
-    @Test
-    public void toStringReturnsExpectedStringWithMultipleElementsInDictionary() {
-        String[] inputs = {
-            "abc",
-            "def"
-        };
-        String expected = "";
-        for (int i = 0; i < inputs.length; ++i) {
-            expected += "[";
-            expected += i;
-            expected += "]";
-            expected += "=";
-            expected += inputs[i];
-            expected += " ";
-        }
-        for (String string : inputs) {
-            dict.add(string);
-        }
-        assertEquals(expected, dict.toString());
     }
 
 }

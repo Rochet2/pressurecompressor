@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pressurecompressor.containers.linkedlist;
+package pressurecompressor.containers.nodetypes;
 
 /**
  * An element used in linked lists
@@ -35,4 +35,10 @@ public class Node<E> {
         this.data = data;
         this.previous = previous;
     }
+
+    @Override
+    public String toString() {
+        return data.toString();
+    }
+
 }

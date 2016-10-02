@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pressurecompressor.containers.linkedlist;
+package pressurecompressor.containers.nodetypes;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -14,6 +14,7 @@ import org.junit.Before;
  * @author rimi
  */
 public class NodeTest {
+
     private Object object1;
     private Object object2;
     private Object object3;
