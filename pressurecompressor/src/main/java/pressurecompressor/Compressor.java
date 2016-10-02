@@ -26,13 +26,16 @@ public class Compressor {
      * @param codeBitLength
      * @return
      */
-    public byte[] compress(byte[] input, int codeBitLength) {
+    public byte[] compress(byte[] input, byte codeBitLength) {
         if (input == null || input.length == 0) {
             return new byte[0];
         }
+        if (codeBitLength < Byte.SIZE || codeBitLength > 14) {
+            return new byte[0];
+        }
         BitStorage output = new BitStorage();
-        output.writeBack(codeBitLength, Integer.SIZE);
-        Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength) - 1);
+        output.writeBack(codeBitLength, Byte.SIZE);
+        Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength));
         ByteSequence w = new ByteSequence();
         for (byte b : input) {
             ByteSequence k = new ByteSequence(new byte[]{b});
@@ -41,12 +44,15 @@ public class Compressor {
             if (dictionary.get(wk) != null) {
                 w = wk;
             } else {
-                dictionary.add(wk, true);
                 output.writeBack(dictionary.get(w), codeBitLength);
+                if (dictionary.isFull()) {
+                    dictionary.reset();
+                }
+                dictionary.add(wk);
                 w = k;
             }
         }
-        output.writeBack(input[input.length - 1], codeBitLength);
+        output.writeBack(dictionary.get(w), codeBitLength);
         return output.flushToBytes();
     }
 
@@ -66,14 +72,14 @@ public class Compressor {
         if (!store.hasBitsToRead(Integer.SIZE)) {
             return new byte[0];
         }
-        int codeBitLength = store.readFront(Integer.SIZE);
-        if (codeBitLength <= 0) {
+        int codeBitLength = store.readFront(Byte.SIZE);
+        if (codeBitLength <= Byte.SIZE || codeBitLength > 14) {
             return new byte[0];
         }
         if (!store.hasBitsToRead(codeBitLength)) {
             return new byte[0];
         }
-        Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength) - 1);
+        Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength));
         LinkedList<ByteSequence> result = new LinkedList<>();
         int k = store.readFront(codeBitLength);
         ByteSequence entry = dictionary.get(k);
@@ -86,13 +92,13 @@ public class Compressor {
             k = store.readFront(codeBitLength);
             entry = dictionary.get(k);
             if (entry == null) {
-                dictionary.add(ByteSequence.join(w, new ByteSequence()), true);
-                w = new ByteSequence();
-                continue;
-                // return new byte[0];
+                return new byte[0];
             }
             result.pushBack(entry);
-            dictionary.add(ByteSequence.join(w, new ByteSequence(new byte[]{entry.getBytes()[0]})), true);
+            if (dictionary.isFull()) {
+                dictionary.reset();
+            }
+            dictionary.add(ByteSequence.join(w, new ByteSequence(new byte[]{entry.getBytes()[0]})));
             w = entry;
         }
         return toBytes(result);
@@ -107,9 +113,7 @@ public class Compressor {
      */
     private Dictionary createDictionary(int dictionarySize) {
         Dictionary map = new Dictionary(dictionarySize);
-        for (int i = 0; i < (int) Math.pow(2, Byte.SIZE) - 1; ++i) {
-            map.add(new ByteSequence(new byte[]{(byte) i}), false);
-        }
+        map.reset();
         return map;
     }
 

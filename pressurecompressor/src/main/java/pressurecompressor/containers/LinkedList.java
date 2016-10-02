@@ -55,12 +55,16 @@ public class LinkedList<E> {
      */
     public Node<E> pushBack(E e) {
         ++length;
-        if (back == null) {
-            front = back = new Node<>(e);
+        if (length == 1) {
+            front = new Node<>(e);
+            back = front;
             return back;
         }
-        back = new Node<>(e, back);
-        back.previous.next = back;
+        Node<E> prev = back;
+        back = new Node<>(e, prev);
+        if (prev != null) {
+            prev.next = back;
+        }
         return back;
     }
 
@@ -83,7 +87,9 @@ public class LinkedList<E> {
         --length;
         E data = front.data;
         front = front.next;
-        front.previous.next = null;
+        if (front.previous != null) {
+            front.previous.next = null;
+        }
         front.previous = null;
         return data;
     }
@@ -107,27 +113,10 @@ public class LinkedList<E> {
         --length;
         E data = back.data;
         back = back.previous;
-        back.next.previous = null;
+        if (back.next != null) {
+            back.next.previous = null;
+        }
         back.next = null;
         return data;
-    }
-
-    /**
-     * Removes the element from any list if it is in any and reduces this list's
-     * length
-     *
-     * @param n
-     */
-    public void remove(Node<E> n) {
-        if (n == null) {
-            return;
-        }
-        --length;
-        if (n.previous != null) {
-            n.previous.next = n.next;
-        }
-        if (n.next != null) {
-            n.next.previous = n.previous;
-        }
     }
 }

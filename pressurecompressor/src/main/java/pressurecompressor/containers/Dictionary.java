@@ -10,15 +10,12 @@ import pressurecompressor.containers.nodetypes.Pair;
 
 /**
  * A class that handles keeping a dictionary of elements mapped to numbers.
- * There is an LRU cache for when the dictionary gets full
  *
  * @author rimi
  */
 public class Dictionary {
 
-    // Front has least recently used
-    private final LinkedList<Integer> lru;
-    private final Object[] bytes; // Pair<ByteSequence, Node<Integer>>
+    private final ByteSequence[] bytes;
     private int elements;
 
     /**
@@ -29,24 +26,11 @@ public class Dictionary {
      */
     public Dictionary(int amountOfElements) {
         this.elements = 0;
-        this.lru = new LinkedList<>();
-        this.bytes = new Object[amountOfElements];
+        this.bytes = new ByteSequence[amountOfElements];
     }
 
     /**
-     * An utility function for getting the element at given index and casting it
-     * to element type
-     *
-     * @param index
-     * @return
-     */
-    private Pair<ByteSequence, Node<Integer>> getElementAt(int index) {
-        return (Pair<ByteSequence, Node<Integer>>) bytes[index];
-    }
-
-    /**
-     * Returns the index of the given element from dictionary or null. Also
-     * updates the element to be on top of LRU cache.
+     * Returns the index of the given element from dictionary or null.
      *
      * @param bs
      * @return
@@ -56,11 +40,7 @@ public class Dictionary {
             return null;
         }
         for (int i = 0; i < elements; ++i) {
-            if (getElementAt(i).first.equals(bs)) {
-                if (getElementAt(i).second != null) {
-                    lru.remove(getElementAt(i).second);
-                    lru.pushBack(i);
-                }
+            if (bytes[i].equals(bs)) {
                 return i;
             }
         }
@@ -68,8 +48,7 @@ public class Dictionary {
     }
 
     /**
-     * Returns the element at given index or null Also updates the element to be
-     * on top of LRU cache.
+     * Returns the element at given index or null
      *
      * @param index Indexes start from 0
      * @return
@@ -81,34 +60,21 @@ public class Dictionary {
         if (index < 0) {
             return null;
         }
-        if (getElementAt(index).second != null) {
-            lru.remove(getElementAt(index).second);
-            lru.pushBack(index);
-        }
-        return getElementAt(index).first;
+        return bytes[index];
     }
 
     /**
      * Adds a element to the dictionary if the element is not null. If the
-     * dictionary is completely full, no elements are added. Adds the element to
-     * the top of the LRU cache if LRU is applied. May remove an older element
-     * from LRU cache if dictionary is full.
+     * dictionary is completely full it is cleared.
      *
      * @param bs
-     * @param applyLru
      */
-    public void add(ByteSequence bs, boolean applyLru) {
+    public void add(ByteSequence bs) {
         if (bs == null) {
             return;
         }
-        if (isFull()) {
-            Integer index = lru.popFront();
-            if (index == null) {
-                return;
-            }
-            bytes[index] = new Pair<>(bs, applyLru ? lru.pushBack(index) : null);
-        } else {
-            bytes[elements] = new Pair<>(bs, applyLru ? lru.pushBack(elements) : null);
+        if (!isFull()) {
+            bytes[elements] = bs;
             ++elements;
         }
     }
@@ -120,6 +86,20 @@ public class Dictionary {
      */
     public boolean isFull() {
         return elements >= bytes.length;
+    }
+
+    /**
+     * Clears and initializes the storage
+     */
+    public void reset() {
+        this.elements = 0;
+        for (int i = 0; i < (int) Math.pow(2, Byte.SIZE); ++i) {
+            if (isFull()) {
+                break;
+            }
+            bytes[elements] = new ByteSequence(new byte[]{(byte) i});
+            ++elements;
+        }
     }
 
 }

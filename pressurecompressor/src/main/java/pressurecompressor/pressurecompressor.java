@@ -6,7 +6,7 @@
 package pressurecompressor;
 
 import java.util.Arrays;
-import pressurecompressor.containers.BitStorage;
+import java.util.Random;
 
 /**
  *
@@ -33,42 +33,46 @@ public class pressurecompressor {
         }
     }
 
+    private static byte[] tryCompress(byte[] input) {
+        Compressor comp = new Compressor();
+        byte[] selected = null;
+        // for (int i = 0; i <= Byte.MAX_VALUE; ++i) {
+        for (int i = 12; i <= 12; ++i) {
+            byte[] compressed = comp.compress(input, (byte) (i));
+            if (compressed == null || compressed.length == 0) {
+                continue;
+            }
+            if (selected == null || selected.length > compressed.length) {
+                selected = compressed;
+            }
+        }
+        return selected;
+    }
+
     public static void main(String[] args) {
-        {
-            BitStorage bgf = new BitStorage();
-            bgf.writeBack(3, 4);
-            int readFront = bgf.readFront(4);
-            System.out.println(readFront);
-        }
-        
-        {
-            Compressor comp = new Compressor();
-            String input = "Onpa mukava päivä tänään, vähän kylmä";
-            byte[] compressed = comp.compress(input.getBytes(), 10);
-            byte[] uncompressed = comp.decompress(compressed);
-            System.out.println(new String(uncompressed));
-        }
 
         if (true) {
             System.out.println(Arrays.toString(args));
-            String input = "^WED^WE^WEE^WEB^WET";
-            System.out.println("original: " + input);
-            System.out.println("input length: " + input.length());
+            // String input = "^WED^WE^WEE^WEB^WET";
+            // System.out.println("original: " + input);
+            // System.out.println("input length: " + input.length());
 
             Compressor comp = new Compressor();
-            byte[] selected = null;
-            for (int i = 0; i < 4; ++i) {
-                byte[] compressed = comp.compress(input.getBytes(), 8 + i);
-                if (selected == null || selected.length > compressed.length) {
-                    selected = compressed;
-                }
-                System.out.println("compressed bits: " + 8 + i);
-                System.out.println("compressed length: " + compressed.length);
-                System.out.println("compressed string is " + (compressed.length / (float) input.length() * 100) + "% of the original");
+            byte[] bytes = new byte[1000000];
+            new Random().nextBytes(bytes);
+            for (int i = 0; i < bytes.length; ++i) {
+                bytes[i] &= 0xF;
             }
+            byte[] selected = tryCompress(bytes);
 
+            System.out.println("original length: " + bytes.length);
+            System.out.println("compressed length: " + selected.length);
+            System.out.println("compressed string is " + (selected.length / (float) bytes.length * 100) + "% of the original");
+            long aikaAlussa = System.currentTimeMillis();
             byte[] uncompressed = comp.decompress(selected);
-            System.out.println("uncompressed: " + new String(uncompressed));
+            long aikaLopussa = System.currentTimeMillis();
+            System.out.println("time spent: " + (aikaLopussa - aikaAlussa) + "ms");
+            // System.out.println("uncompressed: " + new String(uncompressed));
             return;
         }
 
@@ -77,9 +81,9 @@ public class pressurecompressor {
             return;
         }
 
-        int bits = 8;
+        byte bits = 8;
         if (args.length >= 3) {
-            int wantedBits = Integer.parseInt(args[2]);
+            byte wantedBits = Byte.parseByte(args[2]);
             if (bits < wantedBits) {
                 bits = wantedBits;
             }
@@ -87,13 +91,21 @@ public class pressurecompressor {
         Compressor comp = new Compressor();
         byte[] input = FileUtility.readFile(args[1]);
         if ("compress".startsWith(args[0])) {
-            byte[] output = comp.compress(input, bits);
-            FileUtility.writeFile(args[1] + ".compr", output);
-            printResults(input.length, output.length);
+            byte[] output = tryCompress(input);
+            if (output == null) {
+                System.out.println("Compression failed or input is empty");
+            } else {
+                FileUtility.writeFile(args[1] + ".compr", output);
+                printResults(input.length, output.length);
+            }
         } else if ("decompress".startsWith(args[0])) {
             byte[] output = comp.decompress(input);
-            FileUtility.writeFile(args[1] + ".decom", output);
-            printResults(input.length, output.length);
+            if (output == null || output.length == 0) {
+                System.out.println("Decompression failed or input is empty");
+            } else {
+                FileUtility.writeFile(args[1] + ".decom", output);
+                printResults(input.length, output.length);
+            }
         } else {
             printHelp();
         }
