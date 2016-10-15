@@ -1,11 +1,9 @@
 #Testing document
 
-The algorithm has been tested on and off with JUnit and ad hoc tests.
-
 Non JUnit testing:  
 Large random inputs of bytes were given and compressed.
 The compression ratio was close to none with dictionary having LRU cache and with dictionary clearing the output is about 150% of input.
-When random inputs of bytes with less variation were used for compression, the output was around 60% of original.
+When random inputs of bytes with less variation were used for compression, the output was around 60% of original for dictionary clearing.
 
 Stress testing with large random inputs revealed hidden bugs in the algorithm.
 As an example of tests carried out: generate 100000 random bytes and compress and uncompress them.
