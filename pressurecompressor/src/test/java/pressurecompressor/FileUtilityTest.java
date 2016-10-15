@@ -5,6 +5,12 @@
  */
 package pressurecompressor;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -20,8 +26,27 @@ public class FileUtilityTest {
         for (int i = 0; i < 256; ++i) {
             input[i] = (byte) i;
         }
-        FileUtility.writeFile("testFile.txt", input);
-        byte[] output = FileUtility.readFile("testFile.txt");
+        FileUtility.writeFile("target/FileUtility_fileWriteAndReadDoesNotAlterInput.txt", input);
+        byte[] output = FileUtility.readFile("target/FileUtility_fileWriteAndReadDoesNotAlterInput.txt");
+        assertArrayEquals(input, output);
+    }
+
+    @Test
+    public void readNonexistentFileReturnsNull() {
+        try {
+            Files.deleteIfExists(new File("target/FileUtility_readNonexistentFileReturnsNull.txt").toPath());
+        } catch (IOException ex) {
+            assertTrue("Could not delete file", false);
+        }
+        byte[] output = FileUtility.readFile("target/FileUtility_readNonexistentFileReturnsNull.txt");
+        assertNull(output);
+    }
+
+    @Test
+    public void readExistentFileReturnsArray() {
+        byte[] input = new byte[0];
+        FileUtility.writeFile("target/FileUtility_readExistentFileReturnsArray.txt", input);
+        byte[] output = FileUtility.readFile("target/FileUtility_readExistentFileReturnsArray.txt");
         assertArrayEquals(input, output);
     }
 

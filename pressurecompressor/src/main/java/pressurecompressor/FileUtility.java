@@ -35,7 +35,7 @@ public class FileUtility {
         } catch (IOException ex) {
             Logger.getLogger(FileUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return new byte[0];
+        return null;
     }
 
     /**

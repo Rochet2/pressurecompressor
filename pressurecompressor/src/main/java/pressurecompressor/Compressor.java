@@ -18,41 +18,50 @@ import pressurecompressor.containers.nodetypes.Node;
  */
 public class Compressor {
 
+    public static final byte minimumCodeLength = Byte.SIZE;
+    public static final byte maximumCodeLength = 2 * Byte.SIZE;
+
     /**
      * Compresses the given input. If input is null or empty then an empty
      * output is returned. Uses given amount of bits to code each character.
      *
      * @param input
-     * @param codeBitLength
-     * @return
+     * @param codeBitLength can be from 8 to 14
+     * @return null if failed, array otherwise
      */
     public byte[] compress(byte[] input, byte codeBitLength) {
-        if (input == null || input.length == 0) {
+        if (input == null) {
+            System.out.println("Input is null");
+            return null;
+        }
+        if (input.length == 0) {
             return new byte[0];
         }
-        if (codeBitLength < Byte.SIZE || codeBitLength > 14) {
-            return new byte[0];
+        if (codeBitLength < minimumCodeLength || codeBitLength > maximumCodeLength) {
+            System.out.println("Input has invalid code bit length");
+            System.out.println("Was " + codeBitLength + " and expected between " + minimumCodeLength + " and " + maximumCodeLength);
+            return null;
         }
         BitStorage output = new BitStorage();
         output.writeBack(codeBitLength, Byte.SIZE);
         Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength));
-        ByteSequence w = new ByteSequence();
+        ByteSequence sequence = new ByteSequence();
         for (byte b : input) {
-            ByteSequence k = new ByteSequence(new byte[]{b});
-            ByteSequence wk = ByteSequence.join(w, k);
+            ByteSequence B = new ByteSequence(new byte[]{b});
+            ByteSequence sequencePlusB = ByteSequence.join(sequence, B);
 
-            if (dictionary.get(wk) != null) {
-                w = wk;
+            if (dictionary.get(sequencePlusB) != null) {
+                sequence = sequencePlusB;
             } else {
-                output.writeBack(dictionary.get(w), codeBitLength);
+                output.writeBack(dictionary.get(sequence), codeBitLength);
                 if (dictionary.isFull()) {
                     dictionary.reset();
                 }
-                dictionary.add(wk);
-                w = k;
+                dictionary.add(sequencePlusB);
+                sequence = B;
             }
         }
-        output.writeBack(dictionary.get(w), codeBitLength);
+        output.writeBack(dictionary.get(sequence), codeBitLength);
         return output.flushToBytes();
     }
 
@@ -62,44 +71,56 @@ public class Compressor {
      * enough bits to decompress or if the algorithm fails
      *
      * @param input
-     * @return
+     * @return null if failed, array otherwise
      */
     public byte[] decompress(byte[] input) {
         if (input == null) {
-            return new byte[0];
+            System.out.println("Input is null");
+            return null;
         }
         BitStorage store = new BitStorage(input);
-        if (!store.hasBitsToRead(Integer.SIZE)) {
-            return new byte[0];
+        if (!store.hasBitsToRead(Byte.SIZE)) {
+            System.out.println("Input is too small to be valid");
+            return null;
         }
         int codeBitLength = store.readFront(Byte.SIZE);
-        if (codeBitLength <= Byte.SIZE || codeBitLength > 14) {
-            return new byte[0];
+        if (codeBitLength < minimumCodeLength || codeBitLength > maximumCodeLength) {
+            System.out.println("Input has invalid code bit length");
+            System.out.println("Was " + codeBitLength + " and expected between " + minimumCodeLength + " and " + maximumCodeLength);
+            return null;
         }
         if (!store.hasBitsToRead(codeBitLength)) {
             return new byte[0];
         }
         Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength));
         LinkedList<ByteSequence> result = new LinkedList<>();
-        int k = store.readFront(codeBitLength);
-        ByteSequence entry = dictionary.get(k);
-        if (entry == null) {
-            return new byte[0];
+        int previousCode = store.readFront(codeBitLength);
+        ByteSequence sequenceOrB = dictionary.get(previousCode);
+        if (sequenceOrB == null) {
+            System.out.println("Input has invalid token");
+            return null;
         }
-        result.pushBack(entry);
-        ByteSequence w = entry;
+        result.pushBack(sequenceOrB);
         while (store.hasBitsToRead(codeBitLength)) {
-            k = store.readFront(codeBitLength);
-            entry = dictionary.get(k);
-            if (entry == null) {
-                return new byte[0];
+            int codeToSequenceOrB = store.readFront(codeBitLength);
+            sequenceOrB = dictionary.get(codeToSequenceOrB);
+            if (sequenceOrB != null) {
+                result.pushBack(sequenceOrB);
+                ByteSequence previousSequenceOrB = dictionary.get(previousCode);
+                if (dictionary.isFull()) {
+                    dictionary.reset();
+                }
+                dictionary.add(ByteSequence.join(previousSequenceOrB, new ByteSequence(new byte[]{sequenceOrB.getBytes()[0]})));
+            } else {
+                ByteSequence previousSequenceOrB = dictionary.get(previousCode);
+                ByteSequence sequence = ByteSequence.join(previousSequenceOrB, new ByteSequence(new byte[]{previousSequenceOrB.getBytes()[0]}));
+                result.pushBack(sequence);
+                if (dictionary.isFull()) {
+                    dictionary.reset();
+                }
+                dictionary.add(sequence);
             }
-            result.pushBack(entry);
-            if (dictionary.isFull()) {
-                dictionary.reset();
-            }
-            dictionary.add(ByteSequence.join(w, new ByteSequence(new byte[]{entry.getBytes()[0]})));
-            w = entry;
+            previousCode = codeToSequenceOrB;
         }
         return toBytes(result);
     }

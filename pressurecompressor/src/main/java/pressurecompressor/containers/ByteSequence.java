@@ -67,6 +67,8 @@ public class ByteSequence {
      * @return
      */
     public static ByteSequence join(ByteSequence a, ByteSequence b) {
+        if (a == null ||b == null)
+            System.out.println("");
         byte[] temp = new byte[a.bytes.length + b.bytes.length];
         int index = 0;
         for (byte u : a.bytes) {
