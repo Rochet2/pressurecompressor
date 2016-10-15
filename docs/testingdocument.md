@@ -23,4 +23,4 @@ Profiling:
 The algorithm was profiled by using `profilingTest.java` which writes raports in `speedRaport.txt` and `speedRaportRepeitive.txt`.
 The test generates random inputs of given size and then measures the compression time, decompression time and compression ratio.
 Here is an output of the test with graphs:
-![docs/images/profiling_1.png](docs/images/profiling_1.png)
+[![/docs/images/profiling_1.png](/docs/images/profiling_1.png)](/docs/images/profiling_1.png)
