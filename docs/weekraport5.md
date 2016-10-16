@@ -19,6 +19,7 @@
 ##todo next
 - improve documentations
 - generate javadoc
+- improve program clearness by renaming variables and such
 - prepare for demo
 - Start on Huffman compression still?
 
@@ -29,3 +30,4 @@
 
 ##unclear
 - Comments on the O notation and profiling. See the testing document and the implementations documents.
+- if something seems missing, do tell.
