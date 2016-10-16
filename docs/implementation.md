@@ -50,3 +50,66 @@ When input size multiplies by ten, the time spent is about twenty to thirty time
 ```
 
 - https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch
+
+
+## Pseudocode O analysis
+Compression:
+```
+N = input length
+BL = byte length
+A = base character set size
+M = dictionary size = 2^(byte length)
+
+dictionary = makeDictionary() // O(M+A)
+sequence = {} // O(1)
+for (byte in input) // O(N)*
+{
+  if dictionary.get(sequence+byte) // O(M)
+    sequence = sequence+byte // O(1)
+  else
+    output(dictionary.get(sequence)) // O(M)
+    dictionary.add(sequence+byte) // O(A)
+    sequence = byte // O(1)
+}
+return getOutput() // O(N)
+
+Total: O(M+A+N*(2*M+A)+N) = O((M+A)*N+N+M+A) = O((M+A+1)*N) = O(N)
+```
+
+When calculating total we leave out the constants
+Then we can see that N is really dependent on predefined constants M and BL as multipliers
+Such multipliers do not affect the time complexity so we can remove them. Result is O(N) time complexity for compression
+
+Decompression:
+```
+
+N = input length
+
+BL = byte length
+A = base character set size
+M = dictionary size = 2^BL
+
+bitStorage(input) // O(N)
+makeDictionary() // O(A)
+prevCode = bitStorage.read() // O(1)
+sequence = dictionary.get(prevCode) // O(M)
+output(sequence) // O(1)
+for (code in bitStorage) // O(N)*
+{
+  if dicitonary.get(code) // O(1)
+    temp = dictionary.get(prevCode)+dicitonary.get(code)[0] // O(1) O(1)
+    output(dicitonary.get(code)) // O(1)
+    dictionary.add(temp) // O(A)
+  else
+    temp = dictionary.get(prevCode)+dictionary.get(prevCode)[0] // O(1) O(1)
+    output(dictionary.get(prevCode)+dictionary.get(prevCode)[0]) // O(1)
+    dictionary.add(temp) // O(A)
+  prevCode = code // O(1)
+}
+return getOutput() // O(2*N)
+
+Total: O(N+A+M+N*A+2*N) = O((A+3)*N+M+A) = O(A*N) = O(N)
+```
+Even though the `O(A*N)` looks bad, the algorithm only does the O(A) operation when the dictionary is full (every 2^BLth operation) so it is not as bad as it looks.
+I just simplified the calculations a bit because it does not really matter.
+End result is that the algorithm for decompressing is O(N)
