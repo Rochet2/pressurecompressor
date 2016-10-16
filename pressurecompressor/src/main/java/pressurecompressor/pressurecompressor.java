@@ -12,6 +12,7 @@ package pressurecompressor;
 public class pressurecompressor {
 
     private static final String file_extension = ".lzw";
+    private static final byte defaultCompressionBytes = 10;
 
     /**
      * Prints usage of the program
@@ -30,7 +31,10 @@ public class pressurecompressor {
         }
 
         String filePath = args[0];
-        byte codeLength = Byte.parseByte(args[1]);
+        byte codeLength = defaultCompressionBytes;
+        if (args.length >= 2) {
+            Byte.parseByte(args[1]);
+        }
 
         Compressor comp = new Compressor();
         byte[] input = FileUtility.readFile(filePath);
@@ -45,7 +49,7 @@ public class pressurecompressor {
                 System.out.println("Decompression failed");
             } else {
                 FileUtility.writeFile(filePath.substring(0, filePath.length() - file_extension.length()), output);
-                System.out.println("Compression succeeded");
+                System.out.println("Decompression succeeded");
             }
         } else {
             byte[] output = comp.compress(input, codeLength);
