@@ -11,7 +11,7 @@ package pressurecompressor;
  */
 public class pressurecompressor {
 
-    private static String file_extension = ".lzw";
+    private static final String file_extension = ".lzw";
 
     /**
      * Prints usage of the program
@@ -58,6 +58,12 @@ public class pressurecompressor {
         }
     }
 
+    /**
+     * Returns true if the file is compressed (based on it's file extension)
+     *
+     * @param filePath
+     * @return
+     */
     private static boolean fileIsCompressed(String filePath) {
         return filePath.endsWith(file_extension);
     }

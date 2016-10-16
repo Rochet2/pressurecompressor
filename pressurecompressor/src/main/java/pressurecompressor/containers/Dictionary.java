@@ -5,9 +5,6 @@
  */
 package pressurecompressor.containers;
 
-import pressurecompressor.containers.nodetypes.Node;
-import pressurecompressor.containers.nodetypes.Pair;
-
 /**
  * A class that handles keeping a dictionary of elements mapped to numbers.
  *

@@ -15,6 +15,11 @@ import org.junit.Test;
  */
 public class ProfilingTest {
 
+    /**
+     * Generates bytes for compression based on "humanWrittenFile" and runs some
+     * profiling on it with the settings given at the top of the method. The
+     * results are written to target/speedRaportRepetitive.txt
+     */
     @Test
     public void outputSpeedsOnRandomRepetitiveInput() {
         byte byteCodeLength = 10;
@@ -67,6 +72,11 @@ public class ProfilingTest {
                 append(decompressionTimes).toString().getBytes());
     }
 
+    /**
+     * Generates bytes for compression randomly and runs some profiling on it
+     * with the settings given at the top of the method. The results are written
+     * to target/speedRaport.txt
+     */
     @Test
     public void outputSpeedsOnRandomInput() {
         byte byteCodeLength = 10;

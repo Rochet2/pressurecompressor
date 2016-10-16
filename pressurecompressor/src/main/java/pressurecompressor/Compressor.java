@@ -78,34 +78,34 @@ public class Compressor {
             System.out.println("Input is null");
             return null;
         }
-        BitStorage store = new BitStorage(input);
-        if (!store.hasBitsToRead(Byte.SIZE)) {
+        BitStorage inputBytes = new BitStorage(input);
+        if (!inputBytes.hasBitsToRead(Byte.SIZE)) {
             System.out.println("Input is too small to be valid");
             return null;
         }
-        int codeBitLength = store.readFront(Byte.SIZE);
+        int codeBitLength = inputBytes.readFront(Byte.SIZE);
         if (codeBitLength < minimumCodeLength || codeBitLength > maximumCodeLength) {
             System.out.println("Input has invalid code bit length");
             System.out.println("Was " + codeBitLength + " and expected between " + minimumCodeLength + " and " + maximumCodeLength);
             return null;
         }
-        if (!store.hasBitsToRead(codeBitLength)) {
+        if (!inputBytes.hasBitsToRead(codeBitLength)) {
             return new byte[0];
         }
         Dictionary dictionary = createDictionary((int) Math.pow(2, codeBitLength));
-        LinkedList<ByteSequence> result = new LinkedList<>();
-        int previousCode = store.readFront(codeBitLength);
+        LinkedList<ByteSequence> output = new LinkedList<>();
+        int previousCode = inputBytes.readFront(codeBitLength);
         ByteSequence sequenceOrB = dictionary.get(previousCode);
         if (sequenceOrB == null) {
             System.out.println("Input has invalid token");
             return null;
         }
-        result.pushBack(sequenceOrB);
-        while (store.hasBitsToRead(codeBitLength)) {
-            int codeToSequenceOrB = store.readFront(codeBitLength);
+        output.pushBack(sequenceOrB);
+        while (inputBytes.hasBitsToRead(codeBitLength)) {
+            int codeToSequenceOrB = inputBytes.readFront(codeBitLength);
             sequenceOrB = dictionary.get(codeToSequenceOrB);
             if (sequenceOrB != null) {
-                result.pushBack(sequenceOrB);
+                output.pushBack(sequenceOrB);
                 ByteSequence previousSequenceOrB = dictionary.get(previousCode);
                 if (dictionary.isFull()) {
                     dictionary.reset();
@@ -114,7 +114,7 @@ public class Compressor {
             } else {
                 ByteSequence previousSequenceOrB = dictionary.get(previousCode);
                 ByteSequence sequence = ByteSequence.join(previousSequenceOrB, new ByteSequence(new byte[]{previousSequenceOrB.getBytes()[0]}));
-                result.pushBack(sequence);
+                output.pushBack(sequence);
                 if (dictionary.isFull()) {
                     dictionary.reset();
                 }
@@ -122,7 +122,7 @@ public class Compressor {
             }
             previousCode = codeToSequenceOrB;
         }
-        return toBytes(result);
+        return toBytes(output);
     }
 
     /**
@@ -133,9 +133,9 @@ public class Compressor {
      * @return
      */
     private Dictionary createDictionary(int dictionarySize) {
-        Dictionary map = new Dictionary(dictionarySize);
-        map.reset();
-        return map;
+        Dictionary dictionary = new Dictionary(dictionarySize);
+        dictionary.reset();
+        return dictionary;
     }
 
     /**

@@ -33,7 +33,7 @@ public class FileUtility {
             byte[] data = Files.readAllBytes(path);
             return data;
         } catch (IOException ex) {
-            Logger.getLogger(FileUtility.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error reading file: "+ex.toString());
         }
         return null;
     }
@@ -48,7 +48,7 @@ public class FileUtility {
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             fos.write(bytes);
         } catch (IOException ex) {
-            Logger.getLogger(FileUtility.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error writing file: "+ex.toString());
         }
     }
 }
