@@ -29,5 +29,5 @@
 - Learned that other ppl dont use maven projects. ... why :/?
 
 ##unclear
-- Comments on the O notation and profiling. See the testing document and the implementations documents.
+- Please give comments on the O notation and profiling. See the testing document and the implementations documents.
 - if something seems missing, do tell.
