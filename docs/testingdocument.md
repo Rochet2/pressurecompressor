@@ -1,4 +1,4 @@
-#Testing document
+# Testing document
 
 Non JUnit testing:  
 Large random inputs of bytes were given and compressed.

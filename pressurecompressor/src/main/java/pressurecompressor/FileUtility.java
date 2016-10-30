@@ -27,7 +27,7 @@ public class FileUtility {
      * @param filePath
      * @return
      */
-    static byte[] readFile(String filePath) {
+    public static byte[] readFile(String filePath) {
         Path path = Paths.get(filePath);
         try {
             byte[] data = Files.readAllBytes(path);
@@ -44,7 +44,7 @@ public class FileUtility {
      * @param filePath
      * @param bytes
      */
-    static void writeFile(String filePath, byte[] bytes) {
+    public static void writeFile(String filePath, byte[] bytes) {
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             fos.write(bytes);
         } catch (IOException ex) {

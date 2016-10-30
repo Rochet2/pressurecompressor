@@ -1,4 +1,4 @@
-#Specifications
+# Specifications
 
 - Solving packing and unpacking problem of file without data loss
 - Implementing some variation of "Lempel–Ziv–Welch" and if enough time "Huffman coding" algorithm

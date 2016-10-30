@@ -1,4 +1,4 @@
-#Implementation
+# Implementation
 
 The program is used for byte packing. The packing is done by coding all bytes with more than 8 bits.
 With the extra bits we can refer to previous sequences of bytes. If the data contains enough repetition, the packing will produce a smaller output than input.
