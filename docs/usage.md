@@ -18,5 +18,5 @@ I assume you are using linux have maven installed so that you can use it directl
 - `mvn install` compiles the project
 - `mvn test` runs JUnit tests
 - `mvn test org.pitest:pitest-maven:mutationCoverage` creates pit test coverage raport to `/target/pit-reports/*/index.html`
-- `mvn generate-sources javadoc:javadoc` creates javadoc to `target/site/apidocs`
+- `mvn clean | mvn generate-sources javadoc:javadoc` creates javadoc to `target/site/apidocs`
 - `mvn clean | mvn package` creates a publishable self contained jar executable to `target/pressurecompressor.jar`
